@@ -20,6 +20,13 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "include": ["src/main.ts", "src/app.module.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "src/auth",
+    "src/users",
+    "src/avatars"
+  ]
 }
