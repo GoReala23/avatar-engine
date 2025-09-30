@@ -66,3 +66,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # --- Temp ---
 .temp
 .tmp
+
+
+# Compiled output
+src/**/*.js
+src/**/*.js.map
