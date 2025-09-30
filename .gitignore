@@ -17,6 +17,7 @@ pnpm-debug.log*
 lerna-debug.log*
 firebase-debug.log*
 firestore-debug.log
+*.stackdump
 
 # --- Test Coverage ---
 /coverage
@@ -67,6 +68,18 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .temp
 .tmp
 
+# --- Tests & Specs ---
+test/
+src/**/*.spec.ts
+src/scripts/
+
+# --- Firebase (ignore until feature ready) ---
+firebase.json
+firestore.rules
+firestore.indexes.json
+storage.rules
+functions/
+public/
 
 # Compiled output
 src/**/*.js
