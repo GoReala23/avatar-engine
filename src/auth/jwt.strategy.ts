@@ -1,43 +1,31 @@
 // ==========================================================
-// ♾️ jwt.strategy.ts | JWT Strategy
+// ♾️ jwt.strategy.ts | JWT Strategy 🛡️
 // ==========================================================
-// Purpose:
-// Verifies JWT tokens and attaches user info to request.
+// 🧠 Purpose:
+// Passport strategy for validating JWTs.
+// Currently stubbed (accepts any payload).
 //
-// Usage:
-// - Triggered by JwtAuthGuard
-//
-// Tools Used:
-// - Passport JWT Strategy
-// - ConfigService
-//
-// Features:
-// - Decodes token and validates signature
-// - Attaches user info to request
+// 📦 Features (future):
+// - Extract JWT from Authorization header
+// - Validate signature & payload
+// - Attach user object to request
 // ==========================================================
 
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
-import { UserRole } from '../users/user.model';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService) {
+  constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: process.env.JWT_SECRET || 'changeme',
     });
   }
 
-  // --- Validate JWT payload and normalize user object ---
-  async validate(payload: { sub: string; email: string; role: UserRole }) {
-    return {
-      userId: payload.sub,
-      email: payload.email,
-      role: payload.role,
-    };
+  async validate(payload: any) {
+    // 🟡 Stub: Normally return user object from DB
+    return { userId: payload.sub, email: payload.email };
   }
 }

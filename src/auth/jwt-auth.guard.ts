@@ -1,24 +1,17 @@
 // ==========================================================
-// ♾️ jwt-auth.guard.ts | JWT Authentication Guard
+// ♾️ jwt-auth.guard.ts | JWT Auth Guard 🚧
 // ==========================================================
-// Purpose:
-// Activates the JwtStrategy for validating user access.
+// 🧠 Purpose:
+// Protects routes by requiring a valid JWT.
+// Currently stubbed (just extends AuthGuard).
 //
-// Usage:
-// - Applied with @UseGuards(JwtAuthGuard)
-//
-// Tools Used:
-// - NestJS AuthGuard
-// - Passport integration
-//
-// Features:
-// - Validates JWT from request headers
-// - Throws 401 if invalid/missing
+// 📦 Features (future):
+// - Throws 401 if no/invalid token
+// - Injected into controllers with @UseGuards
 // ==========================================================
 
 import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-// --- Guard extending Passport's 'jwt' strategy ---
 export class JwtAuthGuard extends AuthGuard('jwt') {}
