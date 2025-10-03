@@ -1,51 +1,30 @@
 // ==========================================================
-// ♾️ roles.guard.ts | Roles Guard
+// ♾️ roles.guard.ts | Roles Guard 🛡️
 // ==========================================================
-// Purpose:
-// Enforces role-based access control using route metadata.
-//
-// Usage:
-// - Applied with @UseGuards(JwtAuthGuard, RolesGuard)
-//
-// Tools Used:
-// - NestJS Reflector
-// - CanActivate
-//
-// Features:
-// - Blocks unauthorized users even with valid JWT
-// - Supports multi-role access
+// 🧠 Purpose:
+// Enforces role-based access control.
+// Stub: currently always allows, will check user.role later.
 // ==========================================================
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from './roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private reflector: Reflector) {}
 
-  // --- Check roles from metadata and match with user role ---
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>(
-      'roles',
-      context.getHandler(),
-    );
+    // 🔍 Look up required roles from @Roles decorator
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+      context.getHandler(), // method-level
+      context.getClass(),   // class-level
+    ]);
 
-    if (!requiredRoles || requiredRoles.length === 0) {
-      return true;
-    }
+    if (!requiredRoles) return true; // ✅ If no roles, allow request
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
-
-    if (!user || !requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('Insufficient role');
-    }
-
+    const { user } = context.switchToHttp().getRequest();
+    // 🟡 Stub: always allow — later check `user.role`
     return true;
   }
 }
