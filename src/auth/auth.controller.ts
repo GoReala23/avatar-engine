@@ -2,25 +2,45 @@
 // ♾️ auth.controller.ts | Authentication Controller 🔑
 // ==========================================================
 // 🧠 Purpose:
-// Exposes login/register endpoints for the app.
-// Currently stubbed: returns mock tokens & user info.
+// Exposes authentication endpoints for login and registration.
+// Delegates credential checks to AuthService and persistence to UsersService.
 //
-// 📦 Features (future):
-// - Login with email/password
-// - Registration (optional if handled in UsersController)
-// - Refresh token
+// 🔌 Usage:
+// - POST /auth/login → returns JWT + user info
+// - POST /auth/register → creates new user (default role: USER)
+//
+// 🛠 Tools Used:
+// - AuthService (JWT + validation)
+// - UsersService (user persistence)
+// - DTOs (LoginDto, RegisterUserDto)
+// - UserRole enum
 // ==========================================================
+
 
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { UsersService } from '../users/user.service';
+import { UserRole } from 'src/users/user.model';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { LoginDto } from './dto/login.dto';
 
-@Controller('auth') // Base path = /auth
+@Controller('auth') 
 export class AuthController {
-  constructor(private readonly authService: AuthService) {} // Inject AuthService
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {} 
 
-  @Post('login') 
-  async login(@Body() body: { email: string; password: string }) {
-   
+  @Post('login')
+  async login(@Body() body: LoginDto) {
     return this.authService.login(body.email, body.password);
+  }
+
+    @Post('register')
+  async register(@Body() body:RegisterUserDto){
+    return this.usersService.createUser({
+      ...body,
+      role: UserRole.USER,
+    });
   }
 }
