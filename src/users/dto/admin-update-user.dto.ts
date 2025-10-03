@@ -1,17 +1,11 @@
 // ==========================================================
-//  ♾️ admin-update-user.dto.ts | Admin User Update DTO 🛠️
+// ♾️ admin-update-user.dto.ts | Admin User Update DTO 🛠️
 // ==========================================================
-// 🧠 Purpose:
-// Defines what fields an **admin** can update on a user account.
-// - Includes role + email (unlike UpdateUserDto).
-// - Excludes sensitive fields like _id or createdAt.
-//
-// 🔌 Usage:
-// - PATCH /users/:id/admin-update
-//
-// 🛠 Tools Used:
-// - class-validator decorators
+// 🧠 Purpose: Defines fields an admin can update on a user.
+// 🔌 Usage: PATCH /users/:id/admin-update
+// 🛠 Tools: class-validator decorators for validation
 // ==========================================================
+
 
 import { IsOptional, IsString, IsEmail, MinLength, IsEnum } from 'class-validator';
 import { UserRole } from '../user.model';
