@@ -22,7 +22,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { slugify } from 'transliteration';
+// import { slugify } from 'transliteration';
 import { Avatar, AvatarDocument } from '../models/avatar.schema';
 
 @Injectable()
@@ -68,11 +68,15 @@ export class AvatarCoreService {
   // 🟡 POST Methods
   // ===========================
 
-  async createAvatar(data: Partial<Avatar>, tenantId?: string): Promise<Avatar> {
+   async createAvatar(data: Partial<Avatar>, tenantId?: string): Promise<Avatar> {
     if (!data.name) throw new Error('Name is required to create an avatar.');
 
+    // 🟢 TEMP: basic slug generator until transliteration is re-enabled
     if (!data.slug && data.name) {
-      data.slug = slugify(data.name, { lowercase: true });
+      data.slug = data.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')    // convert spaces to dashes
+        .replace(/[^a-z0-9-]/g, ''); // strip non-alphanumeric chars
     }
 
     if (tenantId) (data as any).tenantId = tenantId;
@@ -80,6 +84,7 @@ export class AvatarCoreService {
     const newAvatar = new this.avatarModel(data);
     return await newAvatar.save();
   }
+
 
   // ===========================
   // 🟠 PATCH Methods
