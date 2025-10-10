@@ -3,16 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "noEmitOnError": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "node_modules",
-    "test",
-    "dist",
-    "functions",
-    "src/scripts",
-
-    "**/*.spec.ts"
-  ]
+  "exclude": ["node_modules", "test", "src/scripts", "**/*.spec.ts"]
 }
