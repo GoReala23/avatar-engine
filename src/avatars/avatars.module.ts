@@ -1,21 +1,13 @@
 // ==========================================================
-// ♾️ avatars.module.ts | Avatar Engine™ Main Module 🔗
+// ♾️ avatars.module.ts | Avatars Module ⚔️
 // ==========================================================
 // 🧠 Purpose:
-// Entry point for avatar features (core, humor, voice).
-// Stub version for compilation.
+// Stub for avatar management and progression system.
 //
-// 📦 Features (future):
-// - Avatar schemas + services
-// - Controllers for XP, humor, voice
+// 🛠 Tools Used:
+// - NestJS Module Decorator
 // ==========================================================
-
 import { Module } from '@nestjs/common';
 
-@Module({
-  imports: [],       // will add Mongoose schema + UsersModule later
-  controllers: [],   // will add Avatar controllers later
-  providers: [],     // will add Avatar services later
-  exports: [],       // will export services later
-})
+@Module({})
 export class AvatarsModule {}
