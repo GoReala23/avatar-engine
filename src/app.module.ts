@@ -16,7 +16,12 @@ import { AvatarsModule } from './avatars/avatars.module';
     ConfigModule.forRoot({ isGlobal: true }), // load .env
       MongooseModule.forRootAsync({
       useFactory: async () => {
-        const uri = process.env.MONGO_URI;
+          const { DB_USER, DB_PASSWORD, DB_CLUSTER, DB_NAME, APP_NAME, MONGO_URI } = process.env;
+
+  const uri =
+    MONGO_URI ||
+    `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_CLUSTER}.mongodb.net/${DB_NAME}?retryWrites=true&w=majority&appName=${APP_NAME}`;
+
         if (!uri) {
           Logger.warn('⚠️  No MONGO_URI found in .env file');
         } else {
