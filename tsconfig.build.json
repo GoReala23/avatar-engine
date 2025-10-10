@@ -5,21 +5,14 @@
     "rootDir": "./src",
     "useDefineForClassFields": false
   },
-  "include": [
-    "src/main.ts",
-    "src/app.module.ts",
-    "src/app.controller.ts",
-    "src/app.service.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
     "test",
     "dist",
     "functions",
-    "src/auth",
-    "src/users",
-    "src/avatars",
     "src/scripts",
+
     "**/*.spec.ts"
   ]
 }
