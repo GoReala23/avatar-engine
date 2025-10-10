@@ -2,25 +2,27 @@
 //  ♾️ avatar-core.controller.ts | Avatar Engine™ API 🎮
 // ==========================================================
 // 🧠 Purpose:
-// REST API endpoints for avatar management.
+// Handles all REST API endpoints for avatar management.
+// Serves as the interface between client requests and
+// the AvatarCoreService.
 //
 // 🔌 Usage:
-// - Public: GET avatars by slug, style, rarity
-// - Admin: Create, delete, unlock, reset
-// - Users: Update their fighter’s actions, humor, etc.
-// - AI Responses gated by bond/unlock system
+// - Public:    GET avatars by slug, style, or rarity
+// - Admin:     Create, delete, unlock, or reset avatars
+// - Auth User: Update XP or personal avatar data
 //
 // 🛠 Tools Used:
-// - AvatarCoreService
+// - NestJS Decorators (@Controller, @Get, @Post, etc.)
+// - Guards: JwtAuthGuard + RolesGuard
+// - DTO Validation (class-validator)
 // - UsersService (bond/unlock checks)
-// - DTO validation via class-validator
-// - JWT + RolesGuard for role protection
+// - Swagger decorators (commented until Sprint 5)
 //
 // 📦 Features:
 // - CRUD endpoints
-// - XP and progression
+// - XP progression
 // - Unlock/reset flows
-// - AI avatar dialogue (with bond validation)
+// - AI dialogue endpoint (bond validation)
 // ==========================================================
 
 import {
@@ -35,18 +37,20 @@ import {
   Req,
   ForbiddenException,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+// import { ApiTags } from '@nestjs/swagger'; // enabled in Sprint 5
 import { AvatarCoreService } from '../services/avatar.core.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { UserRole } from '../../users/user.model';
 import { CreateAvatarDto } from '../dto/create-avatar.dto';
+import { AddXpDto } from '../dto/add-xp.dto';
+import { UnlockAvatarDto } from '../dto/unlock-avatar.dto';
 import { AdminUpdateAvatarDto } from '../dto/admin-update-avatar.dto';
 import { UserUpdateAvatarDto } from '../dto/user-update-avatar.dto';
 import { UsersService } from '../../users/user.service';
 
-@ApiTags('Avatars')
+// @ApiTags('Avatars')
 @Controller('avatars')
 export class AvatarCoreController {
   constructor(
@@ -54,46 +58,51 @@ export class AvatarCoreController {
     private readonly usersService: UsersService,
   ) {}
 
-  // ===========================
-  // 🟢 GET Endpoints
-  // ===========================
+  // ======================================================
+  // 🟢 READ  (GET)
+  // ======================================================
 
+  /** Returns all avatars (public). */
   @Get()
   async getAll() {
     return this.avatarService.findAll();
   }
 
+  /** Retrieves a single avatar by its slug. */
   @Get(':slug')
   async getBySlug(@Param('slug') slug: string) {
     return this.avatarService.findBySlug(slug);
   }
 
+  /** Returns all avatars of a given teaching style. */
   @Get('style/:style')
   async getByStyle(@Param('style') style: string) {
     return this.avatarService.findByStyle(style);
   }
 
+  /** Returns all avatars with the given rarity tier. */
   @Get('rarity/:tier')
   async getByRarity(@Param('tier') tier: string) {
     return this.avatarService.findByRarity(tier as any);
   }
 
-  // ===========================
-  // 🟡 POST Endpoints
-  // ===========================
+  // ======================================================
+  // 🟡 CREATE  (POST)
+  // ======================================================
 
+  /** Admin-only: create a new avatar using validated DTO. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post()
-  async create(@Body() body: CreateAvatarDto) {
-    return this.avatarService.createAvatar(body);
+  async create(@Body() createAvatarDto: CreateAvatarDto) {
+    return this.avatarService.createAvatar(createAvatarDto);
   }
 
-  // ===========================
-  // 🟠 PATCH Endpoints
-  // ===========================
+  // ======================================================
+  // 🟠 UPDATE / PATCH
+  // ======================================================
 
-  // 🔧 Admin update
+  /** Admin-only full update. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':slug/admin-update')
@@ -104,7 +113,7 @@ export class AvatarCoreController {
     return this.avatarService.updateAvatar(slug, body);
   }
 
-  // 🔧 User update (limited fields)
+  /** Authenticated user limited update. */
   @UseGuards(JwtAuthGuard)
   @Patch(':slug/user-update')
   async userUpdate(
@@ -114,14 +123,14 @@ export class AvatarCoreController {
     return this.avatarService.updateAvatar(slug, body);
   }
 
-  // ➕ Add XP
+  /** Adds XP to an avatar (user-scoped). */
   @UseGuards(JwtAuthGuard)
   @Patch(':slug/add-xp')
-  async addXP(@Param('slug') slug: string, @Body('xp') xp: number) {
-    return this.avatarService.addXP(slug, xp);
+  async addXP(@Param('slug') slug: string, @Body() addXpDto: AddXpDto) {
+    return this.avatarService.addXP(slug, addXpDto.xp, addXpDto.tenantId);
   }
 
-  // 🔄 Reset
+  /** Admin-only: resets avatar progression. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':slug/reset')
@@ -129,18 +138,25 @@ export class AvatarCoreController {
     return this.avatarService.resetAvatar(slug);
   }
 
-  // 🔓 Unlock
+  /** Admin-only: unlocks avatar manually (uses DTO). */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':slug/unlock')
-  async unlock(@Param('slug') slug: string) {
-    return this.avatarService.unlockAvatar(slug);
+  async unlock(
+    @Param('slug') slug: string,
+    @Body() unlockAvatarDto: UnlockAvatarDto,
+  ) {
+    return this.avatarService.unlockAvatar(
+      slug,
+      unlockAvatarDto?.tenantId || undefined,
+    );
   }
 
-  // ===========================
-  // 🤖 AI Response Endpoint
-  // ===========================
+  // ======================================================
+  // 🤖 AI RESPONSE
+  // ======================================================
 
+  /** Generates contextual AI dialogue from an avatar. */
   @UseGuards(JwtAuthGuard)
   @Post(':slug/ai-response')
   async aiResponse(
@@ -148,10 +164,9 @@ export class AvatarCoreController {
     @Body('context') context: string,
     @Req() req,
   ) {
-    const userId = req.user._id;
-    const role = req.user.role;
+    const { _id: userId, role } = req.user;
 
-    // 🛡️ Admins bypass bond checks
+    // Admins bypass bond validation
     if (role !== UserRole.ADMIN) {
       const hasBond = await this.usersService.hasUnlockedAvatar(userId, slug);
       if (!hasBond) {
@@ -164,10 +179,11 @@ export class AvatarCoreController {
     return this.avatarService.generateAIResponseForAvatar(slug, context);
   }
 
-  // ===========================
-  // 🔴 DELETE Endpoints
-  // ===========================
+  // ======================================================
+  // 🔴 DELETE
+  // ======================================================
 
+  /** Admin-only: permanently delete an avatar. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Delete(':slug')
