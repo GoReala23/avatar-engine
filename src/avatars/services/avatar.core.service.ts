@@ -24,12 +24,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 // import { slugify } from 'transliteration';
 import { Avatar, AvatarDocument } from '../models/avatar.schema';
+import { AiService } from '../../ai/ai.service';  
 
 @Injectable()
 export class AvatarCoreService {
   constructor(
     @InjectModel(Avatar.name)
     private avatarModel: Model<AvatarDocument>,
+    private readonly aiService: AiService,
   ) {}
 
   // ===========================
@@ -140,27 +142,15 @@ async updateAvatar(slug: string, updates: Partial<Avatar>, tenantId?: string) {
   // 🤖 AI Stub
   // ===========================
 
-  async generateAIResponseForAvatar(
-    slug: string,
-    context: string,
-  ): Promise<string> {
+    async generateAIResponseForAvatar(slug: string, context: string): Promise<string> {
     const fighter = await this.findBySlug(slug);
-    const name = fighter.name;
-    const style = (fighter as any).style;
-
-    const intro = {
-      metaphorical: `Greetings! I am ${name}, your metaphorical mentor.`,
-      mnemonic: `Hello! I'm ${name}, here to help you remember things better!`,
-      visual: `Hi! I'm ${name}, your visual guide.`,
-      logical: `Hello! I'm ${name}, your logical assistant.`,
-      cartoon: `Hey there! I'm ${name}, your friendly cartoon avatar!`,
-      cyberpunk: `Greetings, human. I am ${name}, your digital guide.`,
-      futuristic: `Hello, human. I am ${name}, your futuristic companion.`,
-      default: `Hi! I'm ${name}, your avatar.`,
-    }[style] || `Hi! I'm ${name}, your avatar.`;
-
-    return `${intro} I'm here to help you with ${context}. How can I assist you today?`;
+    return this.aiService.generateForAvatar(fighter.name, fighter.style, context);
   }
+
+
+
+
+
 
   // ===========================
   // 🔊 Voice Stub

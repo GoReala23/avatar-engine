@@ -20,12 +20,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'changeme',
     });
   }
 
   async validate(payload: any) {
     // 🟡 Stub: Normally return user object from DB
-    return { userId: payload.sub, email: payload.email };
+    return { userId: payload.sub, email: payload.email, roles: payload.roles || [] };
   }
 }
