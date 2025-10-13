@@ -27,6 +27,10 @@ export class CreateAvatarDto {
   @IsString()
   slug?: string;
 
+  @IsString()
+  @IsOptional()
+  style?: string;
+
   @IsIn(['common', 'rare', 'epic', 'legendary'])
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
 
