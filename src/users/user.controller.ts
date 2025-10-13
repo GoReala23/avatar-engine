@@ -138,6 +138,7 @@ export class UsersController {
   // ==========================================================
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'mod')
+  @Delete(':id')
   async deleteUser(@Param('id') id: string) {
     const deleted = await this.usersService.deleteUser(id);
     if (!deleted) throw new NotFoundException(`User ${id} not found`);
