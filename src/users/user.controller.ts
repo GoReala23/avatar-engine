@@ -35,6 +35,9 @@ import {
 import { UsersService } from './user.service';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+
 
 @Controller('users')
 export class UsersController {
@@ -75,7 +78,8 @@ export class UsersController {
 
   // 🔒 GET ALL USERS
   // ----------------------------------------------------------
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'mod')
   @Get()
   async findAll() {
     try {
@@ -99,7 +103,8 @@ export class UsersController {
   // 🔑 ADMIN UPDATE USER ROLE
   // PATCH /users/:id/role
   // ----------------------------------------------------------
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Patch(':id/role')
   async updateRole(@Param('id') id: string, @Body() body: { role: string }) {
     const updated = await this.usersService.updateUserRole(id, body.role as any);
@@ -113,7 +118,8 @@ export class UsersController {
   // 🧩 ADMIN UPDATE USER INFO
   // PATCH /users/:id/admin-update
   // ----------------------------------------------------------
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'mod')
   @Patch(':id/admin-update')
   async adminUpdate(@Param('id') id: string, @Body() dto: AdminUpdateUserDto) {
     const updated = await this.usersService.updateUser(id, dto);
@@ -130,8 +136,8 @@ export class UsersController {
     // 🗑️ DELETE USER (Admin Only)
   // DELETE /users/:id
   // ==========================================================
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'mod')
   async deleteUser(@Param('id') id: string) {
     const deleted = await this.usersService.deleteUser(id);
     if (!deleted) throw new NotFoundException(`User ${id} not found`);

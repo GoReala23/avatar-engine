@@ -2,8 +2,10 @@
 // ♾️ roles.decorator.ts | Roles Decorator 👑
 // ==========================================================
 // 🧠 Purpose:
-// Attach role metadata to routes, used by RolesGuard.
-// Example: @Roles('admin')
+// Adds role-based metadata to routes, used by RolesGuard.
+//
+// 🛠 Tools Used:
+// - NestJS SetMetadata()
 // ==========================================================
 
 import { SetMetadata } from '@nestjs/common';

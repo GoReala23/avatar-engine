@@ -6,7 +6,7 @@
 // Stub: currently always allows, will check user.role later.
 // ==========================================================
 
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 
@@ -24,7 +24,13 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) return true; // ✅ If no roles, allow request
 
     const { user } = context.switchToHttp().getRequest();
-    // 🟡 Stub: always allow — later check `user.role`
+     if (!user) throw new ForbiddenException('No user found in request');
+
+      if (!requiredRoles.includes(user.role)) {
+      throw new ForbiddenException(
+        `Access denied: requires role(s) [${requiredRoles.join(', ')}]`,
+      );
+    }
     return true;
   }
 }
