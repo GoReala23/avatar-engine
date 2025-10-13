@@ -27,6 +27,7 @@ import {
   Param,
   Patch,
   Body,
+  Delete,
   UseGuards,
   NotFoundException,
   InternalServerErrorException,
@@ -121,6 +122,22 @@ export class UsersController {
     return {
       message: `🛠️ Admin updated user ${id}`,
       user: safe,
+    };
+  }
+
+
+
+    // 🗑️ DELETE USER (Admin Only)
+  // DELETE /users/:id
+  // ==========================================================
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string) {
+    const deleted = await this.usersService.deleteUser(id);
+    if (!deleted) throw new NotFoundException(`User ${id} not found`);
+    return {
+      message: `🗑️ User ${id} deleted successfully`,
+      deletedUserId: id,
     };
   }
 }
