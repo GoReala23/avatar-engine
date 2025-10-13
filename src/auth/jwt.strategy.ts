@@ -11,22 +11,27 @@
 // - Attach user object to request
 // ==========================================================
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
+import { UsersService } from '../users/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly usersService: UsersService, private readonly configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'changeme',
+      secretOrKey: configService.get<string>('JWT_SECRET') || 'changeme',
     });
   }
 
-  async validate(payload: any) {
-    // 🟡 Stub: Normally return user object from DB
-    return { userId: payload.sub, email: payload.email, roles: payload.roles || [] };
+ async validate(payload: { sub: string; email: string; role?: string }) {
+    const user = await this.usersService.findById(payload.sub);
+    if (!user) throw new NotFoundException('User not found'); 
+    // Strip password and return a safe object
+    const { password, ...safe } = user.toObject ? user.toObject() : user;
+    return safe;
   }
 }
