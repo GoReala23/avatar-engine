@@ -6,9 +6,14 @@
 // Secures routes via JWT guard.
 //
 // 🔌 Routes:
-// - GET /users → returns all users (admin-only)
+// ─── User-Level ─────────────────────────────────────────────
 // - GET /users/:id → returns one user by ID
 // - PATCH /users/:id → update user info
+//
+// ─── Admin-Level ───────────────────────────────────────────
+// - GET /users → returns all users (admin-only)
+// - PATCH /users/:id/role → admin role update
+// - PATCH /users/:id/admin-update → admin info update
 //
 // 🛠 Tools Used:
 // - UsersService (business logic layer)
@@ -35,8 +40,40 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // ==========================================================
-  // 🔒 GET ALL USERS (Admin Only)
+  // 👤 USER-LEVEL ROUTES
   // ==========================================================
+
+  // 🧠 GET USER BY ID
+  // ----------------------------------------------------------
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException(`User ${id} not found`);
+    const { password, ...safe } = user.toObject ? user.toObject() : user;
+    return safe;
+  }
+
+  // 🛠 UPDATE USER (General Self Update)
+  // ----------------------------------------------------------
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: AdminUpdateUserDto) {
+    const updated = await this.usersService.updateUser(id, dto);
+    if (!updated) throw new NotFoundException(`User ${id} not found`);
+    const { password, ...safe } = updated.toObject ? updated.toObject() : updated;
+    return {
+      message: `✅ User ${id} updated successfully`,
+      user: safe,
+    };
+  }
+
+  // ==========================================================
+  // 🛡️ ADMIN-LEVEL ROUTES
+  // ==========================================================
+
+  // 🔒 GET ALL USERS
+  // ----------------------------------------------------------
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
@@ -58,29 +95,31 @@ export class UsersController {
     }
   }
 
-  // ==========================================================
-  // 🧠 GET USER BY ID
-  // ==========================================================
+  // 🔑 ADMIN UPDATE USER ROLE
+  // PATCH /users/:id/role
+  // ----------------------------------------------------------
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const user = await this.usersService.findById(id);
-    if (!user) throw new NotFoundException(`User ${id} not found`);
-    const { password, ...safe } = user.toObject ? user.toObject() : user;
-    return safe;
+  @Patch(':id/role')
+  async updateRole(@Param('id') id: string, @Body() body: { role: string }) {
+    const updated = await this.usersService.updateUserRole(id, body.role as any);
+    if (!updated) throw new NotFoundException(`User ${id} not found`);
+    return {
+      message: `🔑 Role updated for user ${id}`,
+      newRole: updated.role,
+    };
   }
 
-  // ==========================================================
-  // 🛠 UPDATE USER (Admin Action)
-  // ==========================================================
+  // 🧩 ADMIN UPDATE USER INFO
+  // PATCH /users/:id/admin-update
+  // ----------------------------------------------------------
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: AdminUpdateUserDto) {
+  @Patch(':id/admin-update')
+  async adminUpdate(@Param('id') id: string, @Body() dto: AdminUpdateUserDto) {
     const updated = await this.usersService.updateUser(id, dto);
     if (!updated) throw new NotFoundException(`User ${id} not found`);
     const { password, ...safe } = updated.toObject ? updated.toObject() : updated;
     return {
-      message: `✅ User ${id} updated successfully`,
+      message: `🛠️ Admin updated user ${id}`,
       user: safe,
     };
   }
