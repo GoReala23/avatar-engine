@@ -27,6 +27,7 @@ import {
   Param,
   Patch,
   Body,
+  Req,
   Delete,
   UseGuards,
   NotFoundException,
@@ -71,6 +72,28 @@ export class UsersController {
       user: safe,
     };
   }
+
+  //// ==========================================================
+// 🔐 CHANGE PASSWORD (Self)
+// PATCH /users/me/change-password
+// ==========================================================
+ @UseGuards(JwtAuthGuard)
+ @Patch('me/change-password')
+ async changePassword(
+   @Req() req: any,
+   @Body() body: { oldPassword: string; newPassword: string },
+ ) {
+   const userId = req.user.userId || req.user.sub;
+   const updated = await this.usersService.changePassword(
+     userId,
+     body.oldPassword,
+     body.newPassword,
+   );
+   return {
+     message: '🔒 Password updated successfully',
+     userId: updated._id,
+   };
+ }
 
   // ==========================================================
   // 🛡️ ADMIN-LEVEL ROUTES

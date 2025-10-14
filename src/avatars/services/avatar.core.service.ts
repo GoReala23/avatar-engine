@@ -52,7 +52,7 @@ export class AvatarCoreService {
   }
 
   async findByStyle(style: string, tenantId?: string): Promise<Avatar[]> {
-  // 🧼 Clean up any invisible chars, spaces, or newlines
+ 
   const cleanStyle = style.replace(/\s+/g, '').trim().toLowerCase();
 
   // Case-insensitive regex match
@@ -91,8 +91,8 @@ export class AvatarCoreService {
     if (!data.slug && data.name) {
       data.slug = data.name
         .toLowerCase()
-        .replace(/\s+/g, '-')    // convert spaces to dashes
-        .replace(/[^a-z0-9-]/g, ''); // strip non-alphanumeric chars
+        .replace(/\s+/g, '-')  
+        .replace(/[^a-z0-9-]/g, ''); 
     }
 
     if (tenantId) (data as any).tenantId = tenantId;

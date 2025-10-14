@@ -17,12 +17,13 @@
 // ==========================================================
 
 
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/user.service';
 import { UserRole } from '../users/user.model';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth') 
 export class AuthController {
@@ -42,5 +43,16 @@ export class AuthController {
       ...body,
       role: UserRole.USER,
     });
+  }
+
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Req() req: any) {
+    // Future: Add token blacklist logic here
+    const user = req.user?.email || 'Unknown';
+    return {
+      message: `👋 ${user} has been logged out successfully (stub).`,
+    };
   }
 }
