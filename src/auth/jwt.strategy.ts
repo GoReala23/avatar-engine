@@ -11,7 +11,7 @@
 // - Attach user object to request
 // ==========================================================
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -30,8 +30,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
  async validate(payload: { sub: string; email: string; role?: string }) {
     const user = await this.usersService.findById(payload.sub);
     if (!user) throw new NotFoundException('User not found'); 
-    // Strip password and return a safe object
-    const { password, ...safe } = user.toObject ? user.toObject() : user;
-    return safe;
+      // ✅ Always ensure role exists (default to 'user')
+    const role = user.role || payload.role || 'user';
+
+     // ✅ Return a consistent shape for req.user used across all controllers
+    return {
+      userId: user._id.toString(),
+      email: user.email,
+      role,
+    };
   }
 }
