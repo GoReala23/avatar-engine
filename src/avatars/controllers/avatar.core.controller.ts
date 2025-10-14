@@ -59,32 +59,58 @@ export class AvatarCoreController {
   ) {}
 
   // ======================================================
-  // 🟢 READ  (GET)
-  // ======================================================
+// 🟢 READ (GET)
+// ======================================================
 
-  /** Returns all avatars (public). */
-  @Get()
-  async getAll() {
-    return this.avatarService.findAll();
-  }
+/** 
+ * 🧾 Returns all avatars (public). 
+ * Optional future: add pagination or query filters.
+ */
+@Get()
+async getAll() {
+  const avatars = await this.avatarService.findAll();
+  return {
+    count: avatars.length,
+    avatars,
+  };
+}
 
-  /** Retrieves a single avatar by its slug. */
-  @Get(':slug')
-  async getBySlug(@Param('slug') slug: string) {
-    return this.avatarService.findBySlug(slug);
-  }
+/**
+ * 🎨 Returns all avatars of a given teaching style.
+ * Must come *before* the slug route to avoid conflict.
+ */
+@Get('style/:style')
+async getByStyle(@Param('style') style: string) {
+  const avatars = await this.avatarService.findByStyle(style as any);
+  
+  return {
+    count: avatars.length,
+    avatars,
+  };
+}
 
-  /** Returns all avatars of a given teaching style. */
-  @Get('style/:style')
-  async getByStyle(@Param('style') style: string) {
-    return this.avatarService.findByStyle(style);
-  }
+/**
+ * 💎 Returns all avatars with the given rarity tier.
+ * Example: GET /avatars/rarity/legendary
+ */
+@Get('rarity/:tier')
+async getByRarity(@Param('tier') tier: string) {
+  const avatars = await this.avatarService.findByRarity(tier as any);
+  return {
+    count: avatars.length,
+    avatars,
+  };
+}
 
-  /** Returns all avatars with the given rarity tier. */
-  @Get('rarity/:tier')
-  async getByRarity(@Param('tier') tier: string) {
-    return this.avatarService.findByRarity(tier as any);
-  }
+/**
+ * 🧍 Retrieves a single avatar by its slug.
+ * Must come *after* style/rarity routes to avoid capture.
+ */
+@Get(':slug')
+async getBySlug(@Param('slug') slug: string) {
+  return this.avatarService.findBySlug(slug);
+}
+
 
   // ======================================================
   // 🟡 CREATE  (POST)

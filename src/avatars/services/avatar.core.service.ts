@@ -52,10 +52,24 @@ export class AvatarCoreService {
   }
 
   async findByStyle(style: string, tenantId?: string): Promise<Avatar[]> {
-    const filter: any = { style };
-    if (tenantId) filter.tenantId = tenantId;
-    return this.avatarModel.find(filter).exec();
-  }
+  // 🧼 Clean up any invisible chars, spaces, or newlines
+  const cleanStyle = style.replace(/\s+/g, '').trim().toLowerCase();
+
+  // Case-insensitive regex match
+   const filter: any = { style: new RegExp(cleanStyle, 'i') };
+  if (tenantId) filter.tenantId = tenantId;
+
+  console.log('🧭 Filter Used:', filter);
+
+  const results = await this.avatarModel.find(filter).exec();
+
+  console.log(`🔍 Found ${results.length} avatars with style "${cleanStyle}"`);
+
+  return results;
+}
+
+
+
 
   async findByRarity(
     tier: 'common' | 'rare' | 'epic' | 'legendary',
@@ -146,10 +160,6 @@ async updateAvatar(slug: string, updates: Partial<Avatar>, tenantId?: string) {
     const fighter = await this.findBySlug(slug);
     return this.aiService.generateForAvatar(fighter.name, fighter.style, context);
   }
-
-
-
-
 
 
   // ===========================
